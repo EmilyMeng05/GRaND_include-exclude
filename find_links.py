@@ -160,9 +160,13 @@ def main():
     args = ap.parse_args()
 
     df = pd.read_csv(args.csv_path)
-    df.columns = [c.lower().strip() for c in df.columns]
+    df.columns = [c.strip() for c in df.columns]
+
+    if "Covidence #" not in df.columns:
+        df["Covidence #"] = ""
+
     for col in ["title", "authors", "doi", "url"]:
-        if col not in df.columns:
+        if col.lower() not in [c.lower() for c in df.columns]:
             df[col] = ""
 
     rows = []
@@ -170,6 +174,9 @@ def main():
     for _, row in df.iterrows():
         if tried >= args.n:
             break
+
+        cov_id = str(row.get("Covidence #", "")).strip()
+        cov_id = cov_id.replace("#", "") if cov_id else ""
 
         title   = str(row.get("title", "")).strip()
         authors = str(row.get("authors", "")).strip()
@@ -179,7 +186,7 @@ def main():
 
         source = "csv"
         found_doi = doi_csv or ""
-        found_url = doi_to_url(doi_csv) if doi_csv else ""
+        found_url = str(row.get("url", "")).strip() or (doi_to_url(doi_csv) if doi_csv else "")
 
         if not doi_csv:
             found_doi, found_url = robust_crossref_find_doi(title, first_author)
@@ -190,6 +197,7 @@ def main():
                     found_doi, found_url, source = s_doi, (s_url or doi_to_url(s_doi)), "scholar"
 
         rows.append({
+            "Covidence #": cov_id,
             "title": title,
             "authors": authors,
             "csv_doi": doi_csv or "",
@@ -197,6 +205,7 @@ def main():
             "found_url": found_url or "",
             "source": source,
         })
+        time.sleep(0.2)
         tried += 1
 
     if args.out:
