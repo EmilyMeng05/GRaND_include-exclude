@@ -199,7 +199,7 @@ def decide_age(evid: List[AgeEvidence], covidence_num: str, source_url: str) -> 
         for e in evid
     )
 
-    # rule 1: baseline-only → Maybe (unless a clear in-range mean overrides? you asked to prefer Maybe)
+    # rule 1: baseline-only → Maybe 
     if baseline_flag and not mean_in:
         return AgeDecision(
             covidence_num, "Maybe",
