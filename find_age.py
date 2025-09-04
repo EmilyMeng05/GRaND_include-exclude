@@ -141,7 +141,6 @@ def extract_age_evidence(text: str) -> List[AgeEvidence]:
             seen.add(key)
             evid.append(AgeEvidence("single", val, None, None, c))
 
-    # grades: "grade 7-9"
     for m in re.finditer(r"grade\s+(\d{1,2})(?:\s*-\s*(\d{1,2}))?", t, flags=re.I):
         g1 = int(m.group(1))
         g2 = int(m.group(2)) if m.group(2) else g1
@@ -154,6 +153,8 @@ def extract_age_evidence(text: str) -> List[AgeEvidence]:
             seen.add(key)
             evid.append(AgeEvidence("grade", None, float(lo), float(hi), c))
 
+    #months 
+    # 115 month / 12 
     return evid
 
 @dataclass
@@ -240,7 +241,7 @@ def decide_age(evid: List[AgeEvidence], covidence_num: str, source_url: str) -> 
 
     # fallback
     return AgeDecision(
-        covidence_num, "UnknownAge",
+        covidence_num, "UnknownAge", 
         ["Age not determinable; consider checking supplements."],
         [asdict(e) for e in evid], source_url
     )
